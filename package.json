@@ -40,7 +40,8 @@
     "test": "vitest run",
     "sync:openapi": "node scripts/sync-openapi.mjs",
     "check:pack": "node scripts/clean-room.mjs",
-    "prepublishOnly": "npm run typecheck && npm test && npm run build && npm run check:pack"
+    "prepublishOnly": "npm run typecheck && npm test && npm run build && npm run check:pack",
+    "release:check": "node scripts/release-check.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.4.0",
