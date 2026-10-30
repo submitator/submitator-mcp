@@ -79,6 +79,18 @@ export class AccessKeyRing {
   }
 }
 
+// The deployment's ring, or null. A key that does not parse switches OAuth
+// off instead of failing the function, so clients that send a key keep
+// working; onError hears about it once.
+export function ringFromEnv(value: string | undefined, onError?: (error: unknown) => void): AccessKeyRing | null {
+  try {
+    return AccessKeyRing.fromEnv(value);
+  } catch (error) {
+    onError?.(error);
+    return null;
+  }
+}
+
 export type AccessTokenCheck = { ok: true; key: Extract<ParsedKey, { ok: true }> } | { ok: false; reason: 'invalid' | 'expired' };
 
 // An access token is ours, for this server, from our issuer, unexpired, and

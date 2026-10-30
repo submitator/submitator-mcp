@@ -97,12 +97,14 @@ export function createMetadataHandler(options: Pick<RemoteOptions, 'allowedHosts
 
 type Gate = { kind: 'key' } | { kind: 'token'; key: string } | { kind: 'challenge'; reason?: 'invalid' | 'expired' };
 
-// An agency key keeps the key path. A Bearer value that is not a key must be
-// one of our access tokens. With no credential at all, listing still works
-// (registries and clients probe it) and a tool call asks the client to sign
-// in: an HTTP 401 with WWW-Authenticate, which is what starts sign-in.
+// An agency key keeps the key path, and so does any X-API-Key: a gateway
+// keeps Authorization for its own credential. A Bearer value that is not a
+// key must be one of our access tokens. With no credential at all, listing
+// still works (registries and clients probe it) and a tool call asks the
+// client to sign in: an HTTP 401 with WWW-Authenticate, which is what starts
+// sign-in.
 function oauthGate(headers: Headers, body: unknown, ring: AccessKeyRing, nowSeconds: number): Gate {
-  if (keyFromHeaders(headers).ok) return { kind: 'key' };
+  if (keyFromHeaders(headers).ok || headers.get('x-api-key')) return { kind: 'key' };
   const authorization = headers.get('authorization')?.trim() ?? '';
   const bearer = /^bearer\s+(\S+)$/i.exec(authorization)?.[1];
   if (bearer && !bearer.startsWith('sbm_')) {
@@ -141,7 +143,11 @@ function messageOf(text: string): unknown {
 function unauthorized(reason?: 'invalid' | 'expired'): Response {
   const body = reason
     ? { error: 'invalid_token', error_description: reason === 'expired' ? 'The access token expired.' : 'The access token is not valid.' }
-    : { error: 'unauthorized', error_description: 'Sign in to Submitator to use this tool.' };
+    : {
+        error: 'unauthorized',
+        error_description:
+          'Sign in to Submitator, or send an agency API key (Authorization: Bearer sbm_...). Keys are created in the agency console: https://app.submitator.com/agency/developers/mcp',
+      };
   return new Response(JSON.stringify(body), {
     status: 401,
     headers: { 'content-type': 'application/json', 'www-authenticate': challenge(reason) },

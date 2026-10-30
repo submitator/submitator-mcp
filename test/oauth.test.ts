@@ -4,7 +4,7 @@
 import { createCipheriv, createHash, randomBytes } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import { createMetadataHandler, createRemoteHandler } from '../src/http.js';
-import { AccessKeyRing, ISSUER, RESOURCE, RESOURCE_METADATA_URL, readAccessToken } from '../src/oauth.js';
+import { AccessKeyRing, ISSUER, RESOURCE, RESOURCE_METADATA_URL, readAccessToken, ringFromEnv } from '../src/oauth.js';
 import { example, json, TEST_KEY } from './helpers.js';
 
 const ENDPOINT = 'https://mcp.submitator.com/mcp';
@@ -72,6 +72,14 @@ describe('access tokens', () => {
     expect(readAccessToken(accessToken({ iss: 'https://evil.example' }), ring, NOW)).toEqual({ ok: false, reason: 'invalid' });
     expect(readAccessToken(accessToken({ aud: 'https://other.example/mcp' }), ring, NOW)).toEqual({ ok: false, reason: 'invalid' });
     expect(readAccessToken(accessToken({ key: 'sbm_test_short' }), ring, NOW)).toEqual({ ok: false, reason: 'invalid' });
+  });
+
+  it('a key that does not parse switches OAuth off, and says so once', () => {
+    const errors: unknown[] = [];
+    expect(ringFromEnv(`${KEY.toString('base64url')}=`, (error) => errors.push(error))).toBeNull();
+    expect(errors).toHaveLength(1);
+    expect(ringFromEnv(KEY.toString('base64url'))).toBeInstanceOf(AccessKeyRing);
+    expect(ringFromEnv(undefined)).toBeNull();
   });
 
   it('keys come from the environment, and a bad one fails at start', () => {
@@ -163,6 +171,15 @@ describe('the remote server with OAuth on', () => {
     const viaKey = await post(remote, call, { authorization: `Bearer ${TEST_KEY}` });
     expect(viaKey.status).toBe(200);
     expect(await viaKey.text()).toContain('api_key_invalid');
+  });
+
+  it('keeps the key path for any X-API-Key, next to a gateway\'s own Authorization', async () => {
+    const { api, remote } = remoteWith();
+    const response = await post(remote, call, { authorization: 'Bearer gateway-credential', 'x-api-key': TEST_KEY });
+    expect(response.status).toBe(200);
+    expect(api.calls[0]?.headers.get('authorization')).toBe(`Bearer ${TEST_KEY}`);
+    const malformed = await post(remote, call, { authorization: 'Bearer gateway-credential', 'x-api-key': 'sbm_test_short' });
+    expect(malformed.status).toBe(200);
   });
 
   it('keeps the key path for agency keys and malformed ones', async () => {
