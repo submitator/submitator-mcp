@@ -59,10 +59,14 @@ if (failures.length > 0) {
   process.exit(1);
 }
 console.error(`
-All checks hold. Before publishing, run the private word check from the backend:
+All checks hold. First, from the backend repo, the private word check:
   bin/mcp-public-check --history
-Then:
-  npm publish --access public
-  mcp-publisher login dns --domain submitator.com   (once, with the registry key)
+Then, in this folder (an npm login session lasts about two hours):
+  npm login
+  npm publish
+And right after it (a registry login lasts five minutes; the key stays outside this repo):
+  PRIVATE_KEY="$(openssl pkey -in ~/.mcp-registry/submitator.pem -outform DER | tail -c 32 | xxd -p -c 64)"
+  mcp-publisher login dns --domain submitator.com --private-key "$PRIVATE_KEY"
+  unset PRIVATE_KEY
   mcp-publisher publish
 `);

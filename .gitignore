@@ -3,3 +3,6 @@ dist/
 *.tgz
 .env
 .DS_Store
+
+# Registry signing keys never live in the repo
+*.pem
