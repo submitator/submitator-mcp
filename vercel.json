@@ -7,11 +7,22 @@
     {
       "source": "/mcp",
       "destination": "/api/mcp"
+    },
+    {
+      "source": "/.well-known/oauth-protected-resource",
+      "destination": "/api/prm"
+    },
+    {
+      "source": "/.well-known/oauth-protected-resource/mcp",
+      "destination": "/api/prm"
     }
   ],
   "functions": {
     "api/mcp.js": {
       "maxDuration": 60
+    },
+    "api/prm.js": {
+      "maxDuration": 10
     }
   }
 }
