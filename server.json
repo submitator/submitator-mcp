@@ -1,0 +1,52 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.submitator/mcp",
+  "title": "Submitator",
+  "description": "Launch your clients' products on up to 100 directories each from Claude Code, Cursor or VS Code.",
+  "version": "0.1.0",
+  "websiteUrl": "https://submitator.com/white-label",
+  "repository": {
+    "url": "https://github.com/submitator/submitator-mcp",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "submitator-mcp",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "SUBMITATOR_API_KEY",
+          "description": "Agency API key from the Submitator agency console (sbm_live_ or sbm_test_)",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.submitator.com/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer and your Submitator agency API key",
+          "isRequired": true,
+          "isSecret": true,
+          "value": "Bearer {api_key}",
+          "variables": {
+            "api_key": {
+              "description": "Agency API key (sbm_live_ or sbm_test_)",
+              "isRequired": true,
+              "isSecret": true
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

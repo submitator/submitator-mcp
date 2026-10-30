@@ -1,0 +1,49 @@
+import type { CallToolResult, InputRequiredResult, ToolAnnotations } from '@modelcontextprotocol/server';
+import type * as z from 'zod';
+import type { ApiClient } from '../client.js';
+import type { KeyMode } from '../key.js';
+import type { Confirm } from './consent.js';
+
+export type Transport = 'stdio' | 'http';
+
+// Local disk access, given to tools only on stdio (the user's own machine).
+export interface LocalFiles {
+  read(path: string): Promise<{ bytes: Uint8Array<ArrayBuffer>; type: string; extension: string }>;
+  write(directory: string | undefined, fileName: string, bytes: Uint8Array): Promise<{ path: string; size: number }>;
+}
+
+export interface ToolContext {
+  api: ApiClient;
+  mode: KeyMode;
+  transport: Transport;
+  files: LocalFiles | undefined;
+  // Asks the client's user directly, where the client can (consent.ts).
+  confirm: Confirm;
+}
+
+export type ToolResult = CallToolResult | InputRequiredResult;
+
+type InputFor<T extends z.ZodObject> = T | ((transport: Transport) => T);
+
+export interface ToolSpec {
+  name: string;
+  title: string;
+  description: string;
+  // The /v1 operations the tool calls: test/contract.test.ts holds this list
+  // equal to the contract, together with EXCLUDED.
+  operations: readonly string[];
+  annotations: Omit<ToolAnnotations, 'title'>;
+  input: InputFor<z.ZodObject>;
+  // Where the tool is listed. No modes: every key, and a missing key.
+  // ['live']: live keys and a missing key. ['test']: test keys only.
+  modes?: readonly KeyMode[];
+  transports?: readonly Transport[];
+  run(args: Record<string, unknown>, context: ToolContext): Promise<ToolResult>;
+}
+
+export function defineTool<T extends z.ZodObject>(spec: Omit<ToolSpec, 'input' | 'run'> & {
+  input: InputFor<T>;
+  run(args: z.infer<T>, context: ToolContext): Promise<ToolResult>;
+}): ToolSpec {
+  return spec as unknown as ToolSpec;
+}
