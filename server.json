@@ -3,7 +3,7 @@
   "name": "com.submitator/mcp",
   "title": "Submitator",
   "description": "Launch your clients' products on up to 100 directories each from Claude, ChatGPT, Cursor or VS Code.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "websiteUrl": "https://submitator.com/white-label",
   "repository": {
     "url": "https://github.com/submitator/submitator-mcp",
@@ -13,7 +13,7 @@
     {
       "registryType": "npm",
       "identifier": "submitator-mcp",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "transport": {
         "type": "stdio"
       },
