@@ -29,6 +29,7 @@ const OURS = [
   ...files(join(root, 'public')),
   ...files(join(root, '.github')),
   join(root, 'README.md'),
+  join(root, 'SECURITY.md'),
   join(root, 'package.json'),
   ...['server.json', 'vercel.json'].map((name) => join(root, name)).filter((path) => {
     try {
@@ -91,5 +92,6 @@ describe('public texts', () => {
   it('covers the files it should', () => {
     expect(OURS.some((path) => path.endsWith('src/client.ts'))).toBe(true);
     expect(OURS.some((path) => path.endsWith('README.md'))).toBe(true);
+    expect(OURS.some((path) => path.endsWith('SECURITY.md'))).toBe(true);
   });
 });

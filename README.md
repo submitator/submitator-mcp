@@ -181,6 +181,8 @@ your client that does not name Submitator.
 - Logins and their passwords are not exposed through this server. Read them in the agency console.
 - Every call shows up in **Developers, Request log** with a request id that starts with `mcp-`.
   Revoke a key there at any time.
+- Report a vulnerability by email to vlad@submitator.com, not in a public issue
+  ([SECURITY.md](https://github.com/submitator/submitator-mcp/blob/main/SECURITY.md)).
 
 ## Development
 
