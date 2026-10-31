@@ -1,7 +1,7 @@
 {
   "name": "submitator-mcp",
   "version": "0.1.0",
-  "description": "Launch your clients' products on up to 100 directories each from Claude Code, Cursor or VS Code.",
+  "description": "Launch your clients' products on up to 100 directories each from Claude, ChatGPT, Cursor or VS Code.",
   "license": "MIT",
   "type": "module",
   "mcpName": "com.submitator/mcp",

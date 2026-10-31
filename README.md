@@ -1,6 +1,6 @@
 # Submitator MCP server
 
-Launch your clients' products on up to 100 directories each from Claude Code, Cursor or VS Code.
+Launch your clients' products on up to 100 directories each from Claude, ChatGPT, Cursor or VS Code.
 
 This MCP server is for agencies on Submitator's white label plan. Your assistant creates a client
 project from a URL, shows which directories it would reach, launches it once you agree, and follows
