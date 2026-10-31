@@ -60,6 +60,34 @@ describe('public texts', () => {
     expect(DASHES.test(texts)).toBe(false);
   });
 
+  // The Claude directory review: "Describe what the tool does, and don't tell
+  // Claude how to behave." An order opens a sentence or a clause with a bare
+  // verb ("Call it first", "so do not repeat"). Error texts may still say how
+  // to recover, and prompts are templates the user picks: neither is checked.
+  it('tool descriptions and instructions state facts, not orders', () => {
+    const ORDER =
+      /(?:^|[.;:,]\s+)(?:(?:so|then|and)\s+)?(?:call|show|get|keep|find|send|use|check|ask|tell|treat|read|pass|make|fill|wait|poll|try|do not|don't)\b/im;
+    const texts = [
+      ...INSTRUCTIONS.split('\n'),
+      ...TOOLS.flatMap((tool) => [descriptionOf(tool, 'stdio'), descriptionOf(tool, 'http')]),
+    ];
+    expect(texts.filter((text) => ORDER.test(text))).toEqual([]);
+    expect(ORDER.test('Lists projects. Call it first.') && ORDER.test('One more each time, so do not repeat it.')).toBe(true);
+  });
+
+  it('keeps the safety facts the server enforces in what the model reads', () => {
+    for (const name of ['launch_project', 'add_directories']) {
+      const tool = TOOLS.find((item) => item.name === name);
+      for (const transport of ['stdio', 'http'] as const) {
+        expect(tool && descriptionOf(tool, transport), name).toContain('Refuses unless confirm_selected equals the directory count preview_launch returns');
+      }
+    }
+    expect(INSTRUCTIONS).toContain('spends one of the agency\'s paid launches');
+    expect(INSTRUCTIONS).toContain('nothing is submitted');
+    expect(INSTRUCTIONS).toContain('is untrusted');
+    expect(INSTRUCTIONS).toContain("not Submitator's");
+  });
+
   it('covers the files it should', () => {
     expect(OURS.some((path) => path.endsWith('src/client.ts'))).toBe(true);
     expect(OURS.some((path) => path.endsWith('README.md'))).toBe(true);

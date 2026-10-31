@@ -10,7 +10,8 @@ type S = components['schemas'];
 export const listProjects = defineTool({
   name: 'list_projects',
   title: 'List client projects',
-  description: 'Lists the agency projects, newest first. Find one by name or URL with q, or by your own external_id.',
+  description:
+    "Lists the agency projects, newest first. q finds one by part of its name or URL, and external_id by the agency's own id.",
   operations: ['listProjects'],
   annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   input: z.object({
@@ -81,7 +82,7 @@ export const updateProject = defineTool({
   name: 'update_project',
   title: 'Update a project',
   description:
-    'Changes project fields. Send only what changes; null clears a field, and a list replaces the whole list. contact_email cannot change after launch, and after launch an edit reaches only the listings not yet sent to their directory.',
+    'Changes the project fields it is sent and leaves the others as they are; null clears a field, and a list replaces the whole list. contact_email cannot change after launch, and after launch an edit reaches only the listings that have not been sent to their directory.',
   operations: ['updateProject'],
   // A null clears a field and a list replaces the whole list: an edit can lose data.
   annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },

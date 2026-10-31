@@ -118,7 +118,7 @@ const requestFields = {
   excluded_directories: z
     .array(directoryId)
     .optional()
-    .describe("Replaces the project's whole exclusion list for this request; [] clears it. To leave some out once, use directories: {exclude}"),
+    .describe("Replaces the project's whole exclusion list for this request; [] clears it. directories: {exclude} leaves some out once instead"),
   auto_replace: z
     .boolean()
     .optional()
@@ -129,7 +129,7 @@ export const previewLaunch = defineTool({
   name: 'preview_launch',
   title: 'Preview a launch',
   description:
-    'Free dry run of launch_project (or of add_directories on a launched project) with the same arguments: how many directories it would submit to, top and median DR, what is missing, what would unlock more, and what it costs. Show the numbers to the user before launching.',
+    'Free dry run of launch_project (or of add_directories on a launched project) with the same arguments: how many directories it would submit to, top and median DR, what is missing, what would unlock more, and what it costs. Its would_submit count is the confirm_selected that launch_project or add_directories requires for the same arguments.',
   operations: ['getProjectReadiness', 'getProject', 'listProjectDirectories'],
   annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   input: z.object(requestFields),
@@ -161,7 +161,7 @@ export const launchProject = defineTool({
   name: 'launch_project',
   title: 'Launch a project',
   description:
-    'Starts submissions and spends one launch of the agency (a test launch with a sbm_test_ key). Call preview_launch with the same arguments first and get the user to agree; confirm_selected is the count they agreed to. With a live key, clients that can ask their user get a confirmation question too.',
+    "Starts submissions and spends one of the agency's paid launches; with a sbm_test_ key it spends a test launch and submits nothing. Refuses unless confirm_selected equals the directory count preview_launch returns for the same arguments. With a live key, clients that can ask their user (MCP elicitation) also get a question to confirm, and the answer does not pass through the model.",
   operations: ['launchProject', 'getProjectReadiness', 'getProject', 'listProjectDirectories'],
   annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
   input: z.object({
@@ -209,7 +209,7 @@ export const addDirectories = defineTool({
   name: 'add_directories',
   title: 'Add directories to a launched project',
   description:
-    'Submits a launched project to more directories from its free allowance (no launch is spent). Call preview_launch with the same arguments first and get the user to agree. An include longer than the free allowance answers allowance_exhausted; a directory already listed answers invalid_directories.',
+    'Submits a launched project to more directories from its free allowance (no launch is spent). Refuses unless confirm_selected equals the directory count preview_launch returns for the same arguments; with a live key, clients that can ask their user also get a question to confirm. An include longer than the free allowance answers allowance_exhausted; a directory already listed answers invalid_directories.',
   operations: ['addProjectListings', 'getProjectReadiness', 'getProject', 'listProjectDirectories'],
   // It submits to third-party directories, and the API has no call that withdraws a submission.
   annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: true },

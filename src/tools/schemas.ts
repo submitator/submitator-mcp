@@ -47,7 +47,7 @@ export const projectFields = {
     .array(z.object({ name: z.string().min(1).max(100), url: z.string().max(500) }))
     .max(20)
     .optional()
-    .describe('Up to 20, some directories need them. Replaces the whole list: send the current one plus changes'),
+    .describe('Up to 20, some directories need them. Replaces the whole list, so an entry left out is removed'),
   tags: z.array(z.string().min(1).max(40)).max(10).optional().describe('Up to 10. Replaces the whole list'),
   audience: z
     .object({ b2b: z.boolean(), ai: z.boolean(), directory: z.boolean() })
@@ -63,5 +63,5 @@ export const projectFields = {
   excluded_directories: z
     .array(directoryId)
     .optional()
-    .describe('Directories never to use for this project. Replaces the whole list (read get_project first); [] clears it'),
+    .describe('Directories never to use for this project. Replaces the whole list, which get_project shows; [] clears it'),
 };

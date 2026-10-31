@@ -10,7 +10,7 @@ export const whoami = defineTool({
   name: 'whoami',
   title: 'Check the API key',
   description:
-    'Shows the agency and mode (live or test) behind the key, its permissions, launches left and the hourly request budget. Call it first.',
+    'Shows the agency and mode (live or test) behind the key, its permissions, launches left and the hourly request budget.',
   operations: ['getPing', 'getAccount'],
   annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   input: z.object({}),

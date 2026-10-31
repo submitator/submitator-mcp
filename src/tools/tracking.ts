@@ -52,7 +52,7 @@ export const listEvents = defineTool({
   name: 'list_events',
   title: 'What changed',
   description:
-    'Changes to projects and listings. The feed keeps 90 days and reads oldest first, so one call scans up to 1,000 events from the cursor (or from the start) and returns the newest ones since `since` (7 days ago by default). Keep next_cursor and pass it next time to read only what came after. For the current state of a project, get_project and list_listings are cheaper.',
+    'Changes to projects and listings. The feed keeps 90 days and reads oldest first, so one call scans up to 1,000 events from the cursor (or from the start) and returns the newest ones since `since` (7 days ago by default). Passed back in a later call, its next_cursor reads only what came after. For the current state of a project, get_project and list_listings are cheaper.',
   operations: ['listEvents'],
   annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   input: z.object({

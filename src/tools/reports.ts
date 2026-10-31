@@ -10,7 +10,7 @@ type S = components['schemas'];
 export const createReport = defineTool({
   name: 'create_report',
   title: 'Build a client report',
-  description: 'Builds a PDF or XLSX report of a project, branded for the agency. Building takes a moment: then call get_report.',
+  description: 'Builds a PDF or XLSX report of a project, branded for the agency. Building takes a moment; get_report says when it is ready.',
   operations: ['createReport'],
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   input: z.object({ project_id: projectId, format: z.enum(['pdf', 'xlsx']) }),

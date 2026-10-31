@@ -79,8 +79,8 @@ export const addScreenshot = defineTool({
   title: 'Add a screenshot',
   description: (transport) =>
     transport === 'stdio'
-      ? 'Adds one screenshot to a project (5 at most), from a public URL or, with the npx package, a local file. Each call adds another one, so do not repeat a call that succeeded.'
-      : 'Adds one screenshot to a project (5 at most), from a public image URL. Each call adds another one, so do not repeat a call that succeeded.',
+      ? 'Adds one screenshot to a project (5 at most), from a public URL or, with the npx package, a local file. Each call adds another one: a repeated call adds the same image twice.'
+      : 'Adds one screenshot to a project (5 at most), from a public image URL. Each call adds another one: a repeated call adds the same image twice.',
   operations: ['addProjectScreenshot'],
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
   input: imageInput,

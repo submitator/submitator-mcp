@@ -11,7 +11,7 @@ export const getBadge = defineTool({
   name: 'get_badge',
   title: 'Get the badge install kit',
   description:
-    "The agency-branded badge some directories require on the client's site: its status, a message to forward to the client, and install code for one platform. Call without platform to see the platforms.",
+    "The agency-branded badge some directories require on the client's site: its status, a message to forward to the client, the platforms it has install code for, and the code for the one named in platform.",
   operations: ['getProjectBadge'],
   annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   input: z.object({
@@ -29,7 +29,7 @@ export const verifyBadge = defineTool({
   name: 'verify_badge',
   title: 'Check the badge on the site',
   description:
-    "Checks the client's site for the badge now. Up to 10 checks an hour per project, so check once after the client says it is installed.",
+    "Checks the client's site for the badge now. Each project gets up to 10 checks an hour.",
   operations: ['verifyProjectBadge'],
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
   input: z.object({ project_id: projectId }),
