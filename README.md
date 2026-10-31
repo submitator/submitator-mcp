@@ -153,7 +153,7 @@ so `save_report_file` and local image paths work only with the `npx` package.
 | `list_projects`, `get_project` | Find client projects; read one in full |
 | `create_project`, `update_project`, `delete_draft` | Create a project from a URL, change its fields, delete a draft |
 | `set_logo`, `add_screenshot`, `remove_image` | Images from a public URL, or a local file with the `npx` package |
-| `preview_launch` | Free dry run of a launch or an add with the same arguments: how many directories, top and median DR, what is missing, the cost |
+| `preview_launch` | Free dry run of a launch or an add with the same arguments: how many directories, what is missing, the cost, plus the top and median DR of the auto pick |
 | `find_directories`, `project_directories` | Search the catalog; see one project's directory choices |
 | `launch_project` | Start submissions. Spends one launch; refuses unless `confirm_selected` equals the count `preview_launch` shows for the same arguments |
 | `add_directories` | Reach more directories from a launched project's free allowance, with the same check |

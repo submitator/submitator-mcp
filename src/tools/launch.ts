@@ -129,7 +129,7 @@ export const previewLaunch = defineTool({
   name: 'preview_launch',
   title: 'Preview a launch',
   description:
-    'Free dry run of launch_project (or of add_directories on a launched project) with the same arguments: how many directories it would submit to, top and median DR, what is missing, what would unlock more, and what it costs. Its would_submit count is the confirm_selected that launch_project or add_directories requires for the same arguments.',
+    'Free dry run of launch_project (or of add_directories on a launched project) with the same arguments: how many directories it would submit to, what is missing, what would unlock more and what it costs, plus the top and median DR of the auto pick. Its would_submit count is the confirm_selected that launch_project or add_directories requires for the same arguments.',
   operations: ['getProjectReadiness', 'getProject', 'listProjectDirectories'],
   annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   input: z.object(requestFields),
