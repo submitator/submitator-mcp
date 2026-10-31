@@ -1,9 +1,12 @@
 // The whole protocol path, through the SDK's own client: a 2026 client over
-// Streamable HTTP, a 2025 client with raw JSON-RPC, and the remote guards.
-import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
+// Streamable HTTP, a 2025 client with raw JSON-RPC, the question before a
+// live launch on each transport, and the remote guards.
+import { Client, InMemoryTransport, StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
 import { describe, expect, it } from 'vitest';
 import { createRemoteHandler } from '../src/http.js';
-import { example, json, LIVE_KEY, TEST_KEY } from './helpers.js';
+import { parseKey } from '../src/key.js';
+import { createServer } from '../src/server.js';
+import { example, fakeFetch, json, LIVE_KEY, TEST_KEY } from './helpers.js';
 
 const ENDPOINT = 'https://mcp.submitator.com/mcp';
 
@@ -125,6 +128,81 @@ async function message(response: Response): Promise<any> {
   const data = text.split('\n').find((line) => line.startsWith('data:'));
   return JSON.parse((data ?? '').slice(5));
 }
+
+// launch_project with a live key, from a client that declares elicitation and
+// accepts every question. Who is asked differs by transport and protocol, and
+// launch_project's description on each transport says which.
+describe('the question before a live launch', () => {
+  const PROJECT = 'prj_4QzX1m9Lr2Vb7Nc8Tk3HwP';
+  const readiness = { ...example('getProjectReadiness'), ready: true, missing: [], cost: { launches: 1, available: 3 } };
+
+  async function launch(transport: 'stdio' | 'http', options: { modern?: boolean } = {}) {
+    const api = fakeFetch([
+      { method: 'GET', path: /\/projects\/prj_[^/]+$/, respond: () => json({ ...example('getProject'), id: PROJECT }) },
+      { method: 'GET', path: /\/readiness$/, respond: () => json(readiness) },
+      { method: 'POST', path: /\/launch$/, respond: () => json(example('launchProject'), 202) },
+    ]);
+    const client = new Client(
+      { name: 'Claude Code', version: '9.9.9' },
+      { capabilities: { elicitation: {} }, ...(options.modern ? { versionNegotiation: { mode: { pin: '2026-07-28' } } } : {}) },
+    );
+    const asked: string[] = [];
+    client.setRequestHandler('elicitation/create', async (request) => {
+      asked.push(request.params.message);
+      return { action: 'accept', content: { confirm: true } };
+    });
+    if (transport === 'stdio') {
+      const server = createServer({ transport, key: parseKey(LIVE_KEY), apiUrl: 'https://api.submitator.com/v1', fetch: api.fetch });
+      const [clientSide, serverSide] = InMemoryTransport.createLinkedPair();
+      await server.connect(serverSide);
+      await client.connect(clientSide);
+    } else {
+      const remote = createRemoteHandler({ allowedHosts: ['mcp.submitator.com'], fetch: api.fetch });
+      await client.connect(
+        new StreamableHTTPClientTransport(new URL(ENDPOINT), {
+          fetch: (url, init) => remote(new Request(url, init)),
+          requestInit: { headers: { Authorization: `Bearer ${LIVE_KEY}` } },
+        }),
+      );
+    }
+    const description = (await client.listTools()).tools.find((tool) => tool.name === 'launch_project')?.description ?? '';
+    const result = await client.callTool({
+      name: 'launch_project',
+      arguments: { project_id: PROJECT, confirm_selected: readiness.directories.selected },
+    });
+    const version = client.getNegotiatedProtocolVersion();
+    await client.close();
+    return { result, asked, version, description, launches: api.calls.filter((call) => call.method === 'POST').length };
+  }
+
+  it('over HTTP, asks a 2026-07-28 client once, then launches', async () => {
+    const run = await launch('http', { modern: true });
+    expect(run.version).toBe('2026-07-28');
+    expect(run.asked).toHaveLength(1);
+    expect(run.asked[0]).toMatch(/spends one of your 3 launches/);
+    expect(run.launches).toBe(1);
+    expect(run.description).toContain('a client on MCP protocol 2026-07-28 that supports elicitation also gets a question to confirm');
+  });
+
+  it('over HTTP, never asks a 2025 client, since no session keeps what it declared, and says so', async () => {
+    const run = await launch('http');
+    expect(run.version).not.toBe('2026-07-28');
+    expect(run.asked).toEqual([]);
+    // Only confirm_selected and the client's own approval stand in the way.
+    expect(run.result.isError).toBeFalsy();
+    expect(run.launches).toBe(1);
+    expect(run.description).toContain('a client on an earlier protocol version is not asked');
+  });
+
+  it('on stdio, asks a 2025 client that declared elicitation, as its description says', async () => {
+    const run = await launch('stdio');
+    expect(run.version).not.toBe('2026-07-28');
+    expect(run.asked).toHaveLength(1);
+    expect(run.launches).toBe(1);
+    expect(run.description).toContain('clients that can ask their user (MCP elicitation) also get a question to confirm');
+    expect(run.description).not.toContain('earlier protocol version');
+  });
+});
 
 describe('remote guards', () => {
   const remote = createRemoteHandler({ allowedHosts: ['mcp.submitator.com'] });

@@ -7,7 +7,7 @@ import { failure, refusal, success } from '../result.js';
 import type { components } from '../v1.js';
 import { declined } from './consent.js';
 import { directoryId, directorySelection, projectId } from './schemas.js';
-import { defineTool, type ToolResult } from './types.js';
+import { defineTool, type ToolResult, type Transport } from './types.js';
 
 type S = components['schemas'];
 type Selection = z.infer<typeof directorySelection>;
@@ -157,11 +157,21 @@ export const previewLaunch = defineTool({
 const MISMATCH =
   'Not done: confirm_selected does not match what this request would submit now. Call preview_launch with the same arguments, show the user the numbers, and call again with the count they agreed to.';
 
+// Who gets the question of consent.ts. On stdio the connection keeps what the
+// client declared at initialize. The remote server builds a new server for
+// each request, so only a 2026-07-28 client, which declares its capabilities
+// on every request, can be asked there.
+function liveQuestion(transport: Transport): string {
+  return transport === 'stdio'
+    ? 'With a live key, clients that can ask their user (MCP elicitation) also get a question to confirm, and the answer does not pass through the model.'
+    : 'With a live key, a client on MCP protocol 2026-07-28 that supports elicitation also gets a question to confirm, and the answer does not pass through the model. This remote server keeps no session, so a client on an earlier protocol version is not asked.';
+}
+
 export const launchProject = defineTool({
   name: 'launch_project',
   title: 'Launch a project',
-  description:
-    "Starts submissions and spends one of the agency's paid launches; with a sbm_test_ key it spends a test launch and submits nothing. Refuses unless confirm_selected equals the directory count preview_launch returns for the same arguments. With a live key, clients that can ask their user (MCP elicitation) also get a question to confirm, and the answer does not pass through the model.",
+  description: (transport) =>
+    `Starts submissions and spends one of the agency's paid launches; with a sbm_test_ key it spends a test launch and submits nothing. Refuses unless confirm_selected equals the directory count preview_launch returns for the same arguments. ${liveQuestion(transport)}`,
   operations: ['launchProject', 'getProjectReadiness', 'getProject', 'listProjectDirectories'],
   annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
   input: z.object({
@@ -208,8 +218,8 @@ export const launchProject = defineTool({
 export const addDirectories = defineTool({
   name: 'add_directories',
   title: 'Add directories to a launched project',
-  description:
-    'Submits a launched project to more directories from its free allowance (no launch is spent). Refuses unless confirm_selected equals the directory count preview_launch returns for the same arguments; with a live key, clients that can ask their user also get a question to confirm. An include longer than the free allowance answers allowance_exhausted; a directory already listed answers invalid_directories.',
+  description: (transport) =>
+    `Submits a launched project to more directories from its free allowance (no launch is spent). Refuses unless confirm_selected equals the directory count preview_launch returns for the same arguments. ${liveQuestion(transport)} An include longer than the free allowance answers allowance_exhausted; a directory already listed answers invalid_directories.`,
   operations: ['addProjectListings', 'getProjectReadiness', 'getProject', 'listProjectDirectories'],
   // It submits to third-party directories, and the API has no call that withdraws a submission.
   annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: true },

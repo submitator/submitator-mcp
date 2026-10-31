@@ -171,7 +171,8 @@ your client that does not name Submitator.
   instead of allowing them always: a launch spends money. These three, like every tool that changes or
   deletes data, carry `destructiveHint: true`, so clients that read the hint ask before each call. With
   a live key, clients that support questions to their user (MCP elicitation) also ask you before a
-  launch or an add, and the answer never passes through the model.
+  launch or an add, and the answer never passes through the model. The remote server keeps no session,
+  so there this question reaches only clients on MCP protocol 2026-07-28.
 - The `npx` package reads the key from its environment and sends it only to `https://api.submitator.com`.
 - Local images are read only from `SUBMITATOR_FILES_DIR` (or the folder the client starts the server in),
   only real PNG, JPEG, GIF or WebP files, and never through a link. Reports are saved to Downloads by
