@@ -13,7 +13,7 @@ export const listListings = defineTool({
   description:
     "A project's listings, one per directory, highest DR first, with status and the live link once published. Or one listing in full by its id.",
   operations: ['listProjectListings', 'getListing'],
-  annotations: { readOnlyHint: true, openWorldHint: false },
+  annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   input: z.object({
     project_id: projectId.optional(),
     listing_id: listingId.optional().describe('Read this one listing instead'),
@@ -54,7 +54,7 @@ export const listEvents = defineTool({
   description:
     'Changes to projects and listings. The feed keeps 90 days and reads oldest first, so one call scans up to 1,000 events from the cursor (or from the start) and returns the newest ones since `since` (7 days ago by default). Keep next_cursor and pass it next time to read only what came after. For the current state of a project, get_project and list_listings are cheaper.',
   operations: ['listEvents'],
-  annotations: { readOnlyHint: true, openWorldHint: false },
+  annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   input: z.object({
     project_id: projectId.optional().describe('Only this project'),
     type: z.string().max(40).optional().describe('A type such as listing.live, or a group: listing.*, project.*, report.*'),

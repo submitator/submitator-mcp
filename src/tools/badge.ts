@@ -13,7 +13,7 @@ export const getBadge = defineTool({
   description:
     "The agency-branded badge some directories require on the client's site: its status, a message to forward to the client, and install code for one platform. Call without platform to see the platforms.",
   operations: ['getProjectBadge'],
-  annotations: { readOnlyHint: true, openWorldHint: false },
+  annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   input: z.object({
     project_id: projectId,
     platform: z.string().max(40).optional().describe('Platform name from the list, for its install code'),

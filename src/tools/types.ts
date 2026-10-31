@@ -25,6 +25,16 @@ export type ToolResult = CallToolResult | InputRequiredResult;
 
 type InputFor<T extends z.ZodObject> = T | ((transport: Transport) => T);
 
+// Every tool states these three, so no client falls back to the protocol's
+// defaults (destructive, open world). Clients such as Claude decide on them
+// whether to ask before a call: a read-only tool runs without asking, a
+// destructive one (it changes or deletes data) asks.
+export type ToolHints = Omit<ToolAnnotations, 'title'> & {
+  readOnlyHint: boolean;
+  destructiveHint: boolean;
+  openWorldHint: boolean;
+};
+
 export interface ToolSpec {
   name: string;
   title: string;
@@ -32,7 +42,7 @@ export interface ToolSpec {
   // The /v1 operations the tool calls: test/contract.test.ts holds this list
   // equal to the contract, together with EXCLUDED.
   operations: readonly string[];
-  annotations: Omit<ToolAnnotations, 'title'>;
+  annotations: ToolHints;
   input: InputFor<z.ZodObject>;
   // Where the tool is listed. No modes: every key, and a missing key.
   // ['live']: live keys and a missing key. ['test']: test keys only.

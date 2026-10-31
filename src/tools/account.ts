@@ -12,7 +12,7 @@ export const whoami = defineTool({
   description:
     'Shows the agency and mode (live or test) behind the key, its permissions, launches left and the hourly request budget. Call it first.',
   operations: ['getPing', 'getAccount'],
-  annotations: { readOnlyHint: true, openWorldHint: false },
+  annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   input: z.object({}),
   async run(_args, { api }) {
     const ping = await api.request<S['Ping']>({ method: 'GET', path: '/ping' });

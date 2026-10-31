@@ -14,7 +14,8 @@ export const advanceTestListing = defineTool({
   title: 'Move a test listing forward',
   description: 'Test mode only: moves a test listing to its next status, or to `to`, without waiting.',
   operations: ['advanceTestListing'],
-  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  // Overwrites the listing's status, and from then on it no longer moves on its own.
+  annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false },
   modes: ['test'],
   input: z.object({
     listing_id: listingId,
@@ -36,7 +37,8 @@ export const setTestLaunches = defineTool({
   title: 'Set test launches',
   description: 'Test mode only: sets how many test launches the agency has (0 to 1000), for example to try running out.',
   operations: ['setTestLaunches'],
-  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  // Overwrites the agency's count of test launches.
+  annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
   modes: ['test'],
   input: z.object({ available: z.number().int().min(0).max(1000) }),
   async run(args, { api }) {

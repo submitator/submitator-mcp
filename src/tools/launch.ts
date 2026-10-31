@@ -131,7 +131,7 @@ export const previewLaunch = defineTool({
   description:
     'Free dry run of launch_project (or of add_directories on a launched project) with the same arguments: how many directories it would submit to, top and median DR, what is missing, what would unlock more, and what it costs. Show the numbers to the user before launching.',
   operations: ['getProjectReadiness', 'getProject', 'listProjectDirectories'],
-  annotations: { readOnlyHint: true, openWorldHint: false },
+  annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   input: z.object(requestFields),
   async run(args, { api, mode }) {
     const outcome = await plan(api, args, mode);
@@ -211,7 +211,8 @@ export const addDirectories = defineTool({
   description:
     'Submits a launched project to more directories from its free allowance (no launch is spent). Call preview_launch with the same arguments first and get the user to agree. An include longer than the free allowance answers allowance_exhausted; a directory already listed answers invalid_directories.',
   operations: ['addProjectListings', 'getProjectReadiness', 'getProject', 'listProjectDirectories'],
-  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+  // It submits to third-party directories, and the API has no call that withdraws a submission.
+  annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: true },
   input: z.object({
     project_id: projectId,
     directories: directorySelection,

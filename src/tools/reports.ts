@@ -31,7 +31,7 @@ export const getReport = defineTool({
   title: 'Read a report',
   description: 'Whether a report is ready, and how to get the file.',
   operations: ['getReport', 'getShareLink'],
-  annotations: { readOnlyHint: true, openWorldHint: false },
+  annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   input: z.object({ report_id: reportId }),
   async run(args, { api, mode, transport }) {
     const result = await api.request<S['Report']>({ method: 'GET', path: `/reports/${args.report_id}` });

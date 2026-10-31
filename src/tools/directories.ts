@@ -13,7 +13,7 @@ export const findDirectories = defineTool({
   description:
     'Searches the directories Submitator submits to, highest Domain Rating first, or reads one by id. Before the agency first buys launches, only the top 20 are shown.',
   operations: ['listDirectories', 'getDirectory'],
-  annotations: { readOnlyHint: true, openWorldHint: false },
+  annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   input: z.object({
     directory_id: directoryId.optional().describe('Read this one directory; other filters are ignored'),
     q: z.string().min(2).max(100).optional().describe('Part of the name'),
@@ -62,7 +62,7 @@ export const projectDirectories = defineTool({
   description:
     "Every catalog directory as seen by one project: suggested (the auto pick), open, locked (with what unlocks it), excluded or listed. Shows suggested, open and locked by default; the counts cover all.",
   operations: ['listProjectDirectories'],
-  annotations: { readOnlyHint: true, openWorldHint: false },
+  annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   input: z.object({
     project_id: projectId,
     states: z.array(z.enum(STATES)).min(1).optional().describe('Which states to list; suggested, open and locked by default'),

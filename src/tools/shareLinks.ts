@@ -15,7 +15,7 @@ export const getShareLink = defineTool({
   title: 'Read the client page link',
   description: "The project's client page link (a read-only progress page in the agency's brand), with its views.",
   operations: ['getShareLink'],
-  annotations: { readOnlyHint: true, openWorldHint: false },
+  annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   modes: ['live'],
   input: z.object({ project_id: projectId }),
   async run(args, { api }) {

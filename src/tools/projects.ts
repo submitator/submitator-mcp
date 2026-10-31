@@ -12,7 +12,7 @@ export const listProjects = defineTool({
   title: 'List client projects',
   description: 'Lists the agency projects, newest first. Find one by name or URL with q, or by your own external_id.',
   operations: ['listProjects'],
-  annotations: { readOnlyHint: true, openWorldHint: false },
+  annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   input: z.object({
     q: z.string().min(2).max(100).optional().describe('Part of the name or URL'),
     status: z.enum(['draft', 'in_progress', 'action_required', 'on_hold', 'completed']).optional(),
@@ -41,7 +41,7 @@ export const getProject = defineTool({
   description:
     'One project in full: status, what it waits for, progress counts, allowance, readiness, texts, images and the image candidates found on its site.',
   operations: ['getProject'],
-  annotations: { readOnlyHint: true, openWorldHint: false },
+  annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   input: z.object({ project_id: projectId }),
   async run(args, { api }) {
     const result = await api.request<S['Project']>({ method: 'GET', path: `/projects/${args.project_id}` });
@@ -83,7 +83,8 @@ export const updateProject = defineTool({
   description:
     'Changes project fields. Send only what changes; null clears a field, and a list replaces the whole list. contact_email cannot change after launch, and after launch an edit reaches only the listings not yet sent to their directory.',
   operations: ['updateProject'],
-  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+  // A null clears a field and a list replaces the whole list: an edit can lose data.
+  annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
   input: z.object({
     project_id: projectId,
     url: z.string().max(2048).optional(),
