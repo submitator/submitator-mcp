@@ -32,7 +32,8 @@ type DescriptionFor = string | ((transport: Transport) => string);
 // Every tool states these three, so no client falls back to the protocol's
 // defaults (destructive, open world). Clients such as Claude decide on them
 // whether to ask before a call: a read-only tool runs without asking, a
-// destructive one (it changes or deletes data) asks.
+// destructive one (it overwrites or deletes data, or submits to directories)
+// asks. A tool that only adds or checks is neither read-only nor destructive.
 export type ToolHints = Omit<ToolAnnotations, 'title'> & {
   readOnlyHint: boolean;
   destructiveHint: boolean;

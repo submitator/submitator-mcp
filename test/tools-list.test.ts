@@ -12,9 +12,10 @@ import { TOOLS } from '../src/tools/index.js';
 import type { Transport } from '../src/tools/types.js';
 import { LIVE_KEY, TEST_KEY } from './helpers.js';
 
-// The tools that change or delete data, or submit what cannot be called back,
-// so clients ask before each call. Changing this list is a decision: the
-// directory review reads these hints.
+// The tools that overwrite or delete data, or submit to directories, which
+// cannot be called back, so clients ask before each call. Tools that only add
+// or check are not here. Changing this list is a decision: the directory
+// review reads these hints.
 const DESTRUCTIVE = [
   'update_project',
   'delete_draft',
