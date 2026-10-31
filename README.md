@@ -11,8 +11,8 @@ API does not.
 ## What you need
 
 - An agency account: [app.submitator.com/agency/start](https://app.submitator.com/agency/start).
-- An API key from **Developers** in the agency console. With claude.ai, the sign-in creates one (see
-  [Remote server](#remote-server)).
+- An API key from **Developers** in the agency console. With claude.ai or ChatGPT, the sign-in creates
+  one (see [Remote server](#remote-server)).
   - A `sbm_test_` key is free from the day you create the agency. It runs in test mode: projects and
     listings are test data, nothing is submitted, and its test launches are not bought ones.
   - A `sbm_live_` key comes with your first purchase. Each `launch_project` spends one launch.
@@ -70,7 +70,7 @@ if you want to upload local images.
 ## Remote server
 
 The remote server at `https://mcp.submitator.com/mcp` needs no install. There are two ways in:
-claude.ai signs in to Submitator, and other clients send an agency key in a header.
+claude.ai and ChatGPT sign in to Submitator, and other clients send an agency key in a header.
 
 ### claude.ai: sign in
 
@@ -94,6 +94,28 @@ new agency gets Test only, and test mode submits nothing.
 On Team and Enterprise plans an Owner adds the connector first, under **Organization settings >
 Connectors**: **Add**, **Custom**, **Web**. Members then press **Connect** under **Customize >
 Connectors**, and each of them signs in.
+
+### ChatGPT: sign in
+
+1. In ChatGPT on the web, open **Plugins** ([chatgpt.com/plugins](https://chatgpt.com/plugins)), press
+   the plus button, then **Add custom MCP server**.
+2. Enter the name `Submitator` and, under **Connection**, the **Server URL**
+   `https://mcp.submitator.com/mcp`.
+3. For authentication pick **OAuth** with a Client ID Metadata Document (CIMD), and enter no client ID
+   or secret: Submitator's sign-in reads ChatGPT's published client document and needs no client
+   registration.
+4. Review the risk warning, select **I understand and want to continue**, then **Create as a plugin**.
+5. Install the plugin, then in a chat type `@` and pick it.
+
+When ChatGPT sends you to Submitator's sign-in, log in to the agency console, pick **Test** or **Live**
+and **Full** or **Read only** on the consent page, and allow ChatGPT. As with claude.ai, the sign-in
+creates a key whose label starts with `MCP:` on the console's **Developers** page (revoke it there to
+disconnect), and a new agency gets Test only.
+
+[OpenAI's documentation](https://developers.openai.com/api/docs/guides/custom-mcp-server) says ChatGPT
+asks for confirmation before write actions by default and treats a tool without `readOnlyHint` as a
+write. Here the tools that only read carry `readOnlyHint: true`, and every other tool `false`. In a
+workspace, its permissions and security settings apply to adding and using custom MCP servers.
 
 ### Claude Code, Cursor, VS Code and other clients: a key in a header
 

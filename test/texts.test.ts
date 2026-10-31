@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest';
 import { INSTRUCTIONS } from '../src/instructions.js';
 import { descriptionOf, TOOLS } from '../src/tools/index.js';
 
-const PROMISES = ['sandbox', 'the only', 'the first', 'coming soon', 'chatgpt'];
+const PROMISES = ['sandbox', 'the only', 'the first', 'coming soon'];
 const DASHES = /[\u2013\u2014]/;
 
 function files(dir: string): string[] {
@@ -52,7 +52,7 @@ describe('public texts', () => {
     expect(text).not.toMatch(/\b100\+/);
   });
 
-  it('tool texts and instructions name only clients that take an API key', () => {
+  it('tool texts and instructions make no promises and carry no long dashes', () => {
     const texts = [
       INSTRUCTIONS,
       ...TOOLS.flatMap((tool) => [tool.title, descriptionOf(tool, 'stdio'), descriptionOf(tool, 'http')]),
