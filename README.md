@@ -80,7 +80,8 @@ claude.ai signs in to Submitator, and other clients send an agency key in a head
 3. Under **Authentication** pick **Sign in now**, keep **Use Claude's published identity (Recommended)**
    as the OAuth client, leave **Request headers** empty and press **Add**.
 4. Submitator's sign-in opens: log in to the agency console. The consent page names the client and its
-   host (Claude, claude.ai). Pick **Test** or **Live** and **Full** or **Read-only**, then press **Allow**.
+   host (Claude, claude.ai). Pick **Test** or **Live** and **Full** or **Read only**, then press
+   **Allow Claude**.
 5. In a chat, open **+**, then **Connectors**, and switch Submitator on.
 
 [This link](https://claude.ai/customize/connectors?modal=add-custom-connector&connectorName=Submitator&connectorUrl=https%3A%2F%2Fmcp.submitator.com%2Fmcp)
