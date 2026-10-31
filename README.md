@@ -11,7 +11,8 @@ API does not.
 ## What you need
 
 - An agency account: [app.submitator.com/agency/start](https://app.submitator.com/agency/start).
-- An API key from **Developers** in the agency console.
+- An API key from **Developers** in the agency console. With claude.ai, the sign-in creates one (see
+  [Remote server](#remote-server)).
   - A `sbm_test_` key is free from the day you create the agency. It runs in test mode: projects and
     listings are test data, nothing is submitted, and its test launches are not bought ones.
   - A `sbm_live_` key comes with your first purchase. Each `launch_project` spends one launch.
@@ -68,20 +69,80 @@ if you want to upload local images.
 
 ## Remote server
 
+The remote server at `https://mcp.submitator.com/mcp` needs no install. There are two ways in:
+claude.ai signs in to Submitator, and other clients send an agency key in a header.
+
+### claude.ai: sign in
+
+1. In claude.ai, open **Customize > Connectors**, press **+ Add**, then **Add custom connector**.
+2. Enter the name `Submitator` and the URL `https://mcp.submitator.com/mcp`, then press **Continue**.
+   Check the settings it found and press **Continue** again.
+3. Under **Authentication** pick **Sign in now**, keep **Use Claude's published identity (Recommended)**
+   as the OAuth client, leave **Request headers** empty and press **Add**.
+4. Submitator's sign-in opens: log in to the agency console. The consent page names the client and its
+   host (Claude, claude.ai). Pick **Test** or **Live** and **Full** or **Read-only**, then press **Allow**.
+5. In a chat, open **+**, then **Connectors**, and switch Submitator on.
+
+[This link](https://claude.ai/customize/connectors?modal=add-custom-connector&connectorName=Submitator&connectorUrl=https%3A%2F%2Fmcp.submitator.com%2Fmcp)
+opens the dialog of step 1 with the name and the URL filled in.
+
+The sign-in creates a key labelled `MCP: Claude` on the console's **Developers** page. Revoke it there
+to disconnect: the next call asks to sign in again. Live needs an agency that has bought launches, so a
+new agency gets Test only, and test mode submits nothing.
+
+On Team and Enterprise plans an Owner adds the connector first, under **Organization settings >
+Connectors**: **Add**, **Custom**, **Web**. Members then press **Connect** under **Customize >
+Connectors**, and each of them signs in.
+
+### Claude Code, Cursor, VS Code and other clients: a key in a header
+
 ```
 URL:    https://mcp.submitator.com/mcp
 Header: Authorization: Bearer <your key>   (X-API-Key: <your key> works too)
 ```
+
+**Claude Code**
 
 ```sh
 claude mcp add --transport http submitator https://mcp.submitator.com/mcp \
   --header "Authorization: Bearer $SUBMITATOR_API_KEY"
 ```
 
-The remote server keeps nothing between requests: it passes your key on to the Submitator API and
-forgets it. Files cannot be read or saved there, so `save_report_file` and local image paths work
-only with the `npx` package. Chat apps that connect only through OAuth (claude.ai for most accounts,
-for example) cannot use it yet; use a client from the list above.
+**Cursor** (`~/.cursor/mcp.json`)
+
+```json
+{
+  "mcpServers": {
+    "submitator": {
+      "url": "https://mcp.submitator.com/mcp",
+      "headers": { "Authorization": "Bearer sbm_test_..." }
+    }
+  }
+}
+```
+
+**VS Code** (`.vscode/mcp.json`): VS Code asks for the key and keeps it out of the file.
+
+```json
+{
+  "inputs": [
+    { "type": "promptString", "id": "submitator-key", "description": "Submitator API key", "password": true }
+  ],
+  "servers": {
+    "submitator": {
+      "type": "http",
+      "url": "https://mcp.submitator.com/mcp",
+      "headers": { "Authorization": "Bearer ${input:submitator-key}" }
+    }
+  }
+}
+```
+
+Other clients that connect over HTTP take the same URL and header.
+
+The remote server keeps nothing between requests: it passes the key, from the header or from the
+sign-in's access token, on to the Submitator API and forgets it. Files cannot be read or saved there,
+so `save_report_file` and local image paths work only with the `npx` package.
 
 ## Tools
 
@@ -107,9 +168,10 @@ your client that does not name Submitator.
 ## Keys and safety
 
 - Keep your client's approval prompt on for `launch_project`, `add_directories` and `update_project`
-  instead of allowing them always: a launch spends money. With a live key, clients that support
-  questions to their user (MCP elicitation) also ask you before a launch or an add, and the answer
-  never passes through the model.
+  instead of allowing them always: a launch spends money. These three, like every tool that changes or
+  deletes data, carry `destructiveHint: true`, so clients that read the hint ask before each call. With
+  a live key, clients that support questions to their user (MCP elicitation) also ask you before a
+  launch or an add, and the answer never passes through the model.
 - The `npx` package reads the key from its environment and sends it only to `https://api.submitator.com`.
 - Local images are read only from `SUBMITATOR_FILES_DIR` (or the folder the client starts the server in),
   only real PNG, JPEG, GIF or WebP files, and never through a link. Reports are saved to Downloads by
