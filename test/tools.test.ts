@@ -117,6 +117,10 @@ describe('preview, launch and add', () => {
     const base = example('getProjectReadiness');
     return { ...base, ready: true, missing: [], cost: { launches: 1, available: 3 }, ...overrides };
   };
+  // A launched project: no launch left to spend on it, and `selected` directories to add.
+  const launched = (selected: number) =>
+    ready({ cost: { launches: 0, available: 3 }, directories: { selected, limit: 40, top_domain_rating: 70, median_domain_rating: 50 } });
+  const added = () => route('POST', /\/listings$/, () => json(example('addProjectListings'), 202));
   const project = () => ({ ...example('getProject'), id: PROJECT });
   // 10 fitting directories (2 suggested, 8 open), 1 excluded and 1 article platform.
   const choices = () => {
@@ -243,11 +247,30 @@ describe('preview, launch and add', () => {
       expect(out(await tool('launch_project').run({ project_id: PROJECT, confirm_selected: readiness.directories.selected }, ctx)).isError).toBeFalsy();
       expect(confirm).not.toHaveBeenCalled();
     });
+
+    it('adds directories only after the person confirms', async () => {
+      const confirm = ask({ kind: 'confirmed' });
+      const { ctx, calls } = context(routes(launched(37), [added()]), { mode: 'live', confirm });
+      const result = out(await tool('add_directories').run({ project_id: PROJECT, directories: 'auto', confirm_selected: 37 }, ctx));
+      expect(result.isError, textOf(result)).toBeFalsy();
+      expect(confirm).toHaveBeenCalledOnce();
+      expect(confirm.mock.calls[0]?.[1]).toMatch(/to 37 more directories/);
+      expect(posts(calls)).toHaveLength(1);
+    });
+
+    it('adds nothing when the person declines', async () => {
+      const confirm = ask({ kind: 'declined' });
+      const { ctx, calls } = context(routes(launched(37)), { mode: 'live', confirm });
+      const result = out(await tool('add_directories').run({ project_id: PROJECT, directories: 'auto', confirm_selected: 37 }, ctx));
+      expect(result.isError).toBe(true);
+      expect(textOf(result)).toContain('did not confirm');
+      expect(confirm).toHaveBeenCalledOnce();
+      expect(posts(calls)).toHaveLength(0);
+    });
   });
 
   it('adds to a launched project only with a selection and a matching count', async () => {
-    const readiness = ready({ cost: { launches: 0, available: 3 }, directories: { selected: 4, limit: 40, top_domain_rating: 70, median_domain_rating: 50 } });
-    const { ctx, calls } = context(routes(readiness, [route('POST', /\/listings$/, () => json(example('addProjectListings'), 202))]));
+    const { ctx, calls } = context(routes(launched(4), [added()]));
     const result = out(await tool('add_directories').run({ project_id: PROJECT, directories: 'auto', confirm_selected: 4 }, ctx));
     expect(result.isError, textOf(result)).toBeFalsy();
     expect(await posts(calls)[0]?.json()).toEqual({ directories: 'auto' });
@@ -255,6 +278,15 @@ describe('preview, launch and add', () => {
     expect(textOf(await tool('add_directories').run({ project_id: PROJECT, directories: 'auto', confirm_selected: 4 }, draft.ctx))).toContain(
       'launch_project',
     );
+  });
+
+  it('refuses an add whose count does not match, and does not hand over the right one', async () => {
+    const { ctx, calls } = context(routes(launched(37), [added()]));
+    const result = out(await tool('add_directories').run({ project_id: PROJECT, directories: 'auto', confirm_selected: 38 }, ctx));
+    expect(result.isError).toBe(true);
+    expect(textOf(result)).toContain('preview_launch');
+    expect(textOf(result)).not.toContain('37');
+    expect(posts(calls)).toHaveLength(0);
   });
 });
 
