@@ -25,6 +25,10 @@ export type ToolResult = CallToolResult | InputRequiredResult;
 
 type InputFor<T extends z.ZodObject> = T | ((transport: Transport) => T);
 
+// A description that differs by transport says only what that transport does:
+// the remote server reads and saves no files.
+type DescriptionFor = string | ((transport: Transport) => string);
+
 // Every tool states these three, so no client falls back to the protocol's
 // defaults (destructive, open world). Clients such as Claude decide on them
 // whether to ask before a call: a read-only tool runs without asking, a
@@ -38,7 +42,7 @@ export type ToolHints = Omit<ToolAnnotations, 'title'> & {
 export interface ToolSpec {
   name: string;
   title: string;
-  description: string;
+  description: DescriptionFor;
   // The /v1 operations the tool calls: test/contract.test.ts holds this list
   // equal to the contract, together with EXCLUDED.
   operations: readonly string[];

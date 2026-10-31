@@ -58,8 +58,10 @@ function imagesOf(project: S['Project']) {
 export const setLogo = defineTool({
   name: 'set_logo',
   title: 'Set the logo',
-  description:
-    "Sets or replaces a project's logo. A URL is fetched right away (a failed fetch answers image_unreachable); with the npx package a local file inside SUBMITATOR_FILES_DIR (or the folder the server started in) works too.",
+  description: (transport) =>
+    transport === 'stdio'
+      ? "Sets or replaces a project's logo. A URL is fetched right away (a failed fetch answers image_unreachable); with the npx package a local file inside SUBMITATOR_FILES_DIR (or the folder the server started in) works too."
+      : "Sets or replaces a project's logo from a public image URL, fetched right away (a failed fetch answers image_unreachable).",
   operations: ['setProjectLogo'],
   annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
   input: imageInput,
@@ -75,8 +77,10 @@ export const setLogo = defineTool({
 export const addScreenshot = defineTool({
   name: 'add_screenshot',
   title: 'Add a screenshot',
-  description:
-    'Adds one screenshot to a project (5 at most), from a public URL or, with the npx package, a local file. Each call adds another one, so do not repeat a call that succeeded.',
+  description: (transport) =>
+    transport === 'stdio'
+      ? 'Adds one screenshot to a project (5 at most), from a public URL or, with the npx package, a local file. Each call adds another one, so do not repeat a call that succeeded.'
+      : 'Adds one screenshot to a project (5 at most), from a public image URL. Each call adds another one, so do not repeat a call that succeeded.',
   operations: ['addProjectScreenshot'],
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
   input: imageInput,

@@ -1,7 +1,8 @@
 // What a client reads in tools/list, on each transport and with each kind of
 // key: the hints clients such as Claude use to decide whether to ask before a
-// call. stdio goes through the SDK's in-memory pair, HTTP through the remote
-// handler, each with the SDK's own client.
+// call, and descriptions that offer only what the transport does. stdio goes
+// through the SDK's in-memory pair, HTTP through the remote handler, each
+// with the SDK's own client.
 import { Client, InMemoryTransport, StreamableHTTPClientTransport, type Tool } from '@modelcontextprotocol/client';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { createRemoteHandler } from '../src/http.js';
@@ -91,5 +92,25 @@ describe('the pinned destructive tools', () => {
     const seen = new Set<string>();
     for (const { transport, key } of COMBINATIONS) for (const tool of await listTools(transport, key)) seen.add(tool.name);
     expect(DESTRUCTIVE.filter((name) => !seen.has(name))).toEqual([]);
+  });
+});
+
+// The remote server reads and saves no files, so on HTTP no tool may offer them.
+const LOCAL_FILES = /\bnpx\b|SUBMITATOR_FILES_DIR|\blocal (?:file|folder|image)|\bfile_path\b/i;
+
+describe('descriptions follow the transport', () => {
+  it('on HTTP, no tool offers local files, SUBMITATOR_FILES_DIR or the npx package', async () => {
+    for (const key of ['live', 'test', 'none'] as const) {
+      for (const tool of await listTools('http', key)) {
+        expect(JSON.stringify([tool.description, tool.inputSchema]), `${tool.name} (key: ${key})`).not.toMatch(LOCAL_FILES);
+      }
+    }
+  });
+
+  it('on stdio, set_logo and add_screenshot keep their local file', async () => {
+    const tools = await listTools('stdio', 'test');
+    for (const name of ['set_logo', 'add_screenshot']) {
+      expect(tools.find((tool) => tool.name === name)?.description, name).toMatch(LOCAL_FILES);
+    }
   });
 });

@@ -70,6 +70,11 @@ export function listed(tool: ToolSpec, mode: KeyMode | null, transport: Transpor
   return tool.modes.includes(mode ?? 'live');
 }
 
+// The description a client on this transport reads.
+export function descriptionOf(tool: ToolSpec, transport: Transport): string {
+  return typeof tool.description === 'function' ? tool.description(transport) : tool.description;
+}
+
 export interface ToolDeps {
   api: ApiClient | null;
   mode: KeyMode | null;
@@ -88,7 +93,7 @@ export function registerTools(server: McpServer, deps: ToolDeps): void {
       tool.name,
       {
         title: tool.title,
-        description: tool.description,
+        description: descriptionOf(tool, deps.transport),
         inputSchema,
         annotations: { title: tool.title, ...tool.annotations },
       },

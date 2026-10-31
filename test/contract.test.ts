@@ -3,7 +3,7 @@
 // input exists in the contract, and every input enum matches it.
 import { describe, expect, it } from 'vitest';
 import * as z from 'zod';
-import { EXCLUDED, TOOLS } from '../src/tools/index.js';
+import { descriptionOf, EXCLUDED, TOOLS } from '../src/tools/index.js';
 import type { ToolSpec, Transport } from '../src/tools/types.js';
 import { contract, operation, operations } from './helpers.js';
 
@@ -130,7 +130,9 @@ describe('tool texts', () => {
     for (const tool of TOOLS) {
       expect(tool.title.length, tool.name).toBeGreaterThan(3);
       expect(tool.name.length, tool.name).toBeLessThanOrEqual(64);
-      expect(tool.description.length, tool.name).toBeGreaterThan(20);
+      for (const transport of ['stdio', 'http'] as const) {
+        expect(descriptionOf(tool, transport).length, `${tool.name} (${transport})`).toBeGreaterThan(20);
+      }
       expect(typeof tool.annotations.readOnlyHint, tool.name).toBe('boolean');
       if (!tool.annotations.readOnlyHint) expect(typeof tool.annotations.destructiveHint, tool.name).toBe('boolean');
     }

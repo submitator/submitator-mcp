@@ -6,7 +6,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { INSTRUCTIONS } from '../src/instructions.js';
-import { TOOLS } from '../src/tools/index.js';
+import { descriptionOf, TOOLS } from '../src/tools/index.js';
 
 const PROMISES = ['sandbox', 'the only', 'the first', 'coming soon', 'chatgpt'];
 const DASHES = /[\u2013\u2014]/;
@@ -52,7 +52,10 @@ describe('public texts', () => {
   });
 
   it('tool texts and instructions name only clients that take an API key', () => {
-    const texts = [INSTRUCTIONS, ...TOOLS.flatMap((tool) => [tool.title, tool.description])].join('\n');
+    const texts = [
+      INSTRUCTIONS,
+      ...TOOLS.flatMap((tool) => [tool.title, descriptionOf(tool, 'stdio'), descriptionOf(tool, 'http')]),
+    ].join('\n');
     expect(hits(texts, PROMISES)).toEqual([]);
     expect(DASHES.test(texts)).toBe(false);
   });
